@@ -1,7 +1,12 @@
-def help_info(code):
-    """Выводит информацию о категориях расходов"""
-    for number, category in code.items():
-        print(f'{number} - {category}')
+def print_generator(func):
+    """Создаёт пробелы вокруг функции"""
+
+    def wrapped():
+        print()
+        func()
+        print()
+
+    return wrapped
 
 
 spending = {
@@ -20,25 +25,45 @@ category_code = {
     4: "Дивиденды",
     5: "Аренда",
     6: "Доставка",
-    0: "Прочее",
+    0: "Прочее"
 }
 
-while True:
-    user_input = input('Ввод: ')
-    if user_input.lower() == 'q':
-        break
-    elif user_input.lower() in ['?', 'h', 'help', 'п', 'помощь']:
-        help_info(category_code)
-    else:
-        split_input = user_input.split()
-        user_key = int(split_input[0])
-        user_value = int(split_input[1])
-        spending[user_key].append(user_value)
+month = input('Введите месяц: ').title()
 
-print()
 
-with open('data/spending.txt', 'w', encoding='UTF-8') as file:
-    for key, value in spending.items():
-        print(f'{category_code[key]} - {sum(value)}')
-        file.write(f'{category_code[key]} - {sum(value)}\n')
-print()
+@print_generator
+def help_info():
+    """Выводит информацию о категориях расходов"""
+    for number, category in category_code.items():
+        print(f'{number} - {category}')
+
+
+@print_generator
+def get_user_input():
+    """Получает информацию и создаёт словарь с расходами по каждой категории"""
+    while True:
+        user_key = input('Ввод катег')  # нужен int
+        if user_key.lower() in ['q', 'й']:
+            break
+        elif user_key.lower() in ['?', 'h', 'help', 'п', 'помощь']:
+            help_info(category_code)
+        else:
+            user_value = int(input('Ввод суммы'))
+            spending[int(user_key)].append(user_value)
+
+
+@print_generator
+def write_result():
+    """Записывает результат в data/название_месяца.txt """
+    with open(f'data/{month}.txt', 'w', encoding='UTF-8') as file:
+        print(month)
+        file.write(f'{month.upper()}\n')
+        for key, value in spending.items():
+            print(f'{category_code[key].ljust(13)} - {sum(value)}')
+            file.write(f'{category_code[key].ljust(13)} - {sum(value)}\n')
+
+
+if __name__ == '__main__':
+    help_info()
+    get_user_input()
+    write_result()
